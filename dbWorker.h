@@ -6,21 +6,23 @@
 #include <QSqlError>
 #include <QMutex>
 #include <qDebug>
+#include "tsquene.h"
 
 class DbWorker
 {
 private:
-    QSqlDatabase _database;
+    TSQueue<QSqlDatabase>*  _queue;
+   // QSqlDatabase _database;
     QString _dbName = "test.sqlite3";
     QString _nameConnection;
-    std::atomic_int *_counter;
+ 
 
 public:
-    DbWorker(QString nameConnection, std::atomic_int *counter);
+    DbWorker();
     ~DbWorker();
 
     bool connect();
-    void send(qint64 time);
+    bool send(qint64 time);
 };
 
 #endif

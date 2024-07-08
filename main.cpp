@@ -8,33 +8,33 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+   static  DbWorker dbWorker;
+    bool state = dbWorker.connect();
 
-    QTimer timer;
     static std::atomic_int count{0};
-
+    QTimer timer;
     QObject::connect(&timer, &QTimer::timeout, []()
                      { 
                         static std::atomic_int lastCount{0};
                         qDebug() << "inserts: " << count - lastCount << "all: " << count;
-                        lastCount = count.load(); });
+                        lastCount =  count.load() - lastCount; });
     timer.start(1000);
 
     qDebug() << "auto thread count detect:" << QThread::idealThreadCount();
 
-    for (size_t i = 0; i < QThread::idealThreadCount(); i++)
+    for (size_t i = 0; i < 10; i++)
     {
         QtConcurrent::run([=]()
                           {
-                              DbWorker dbWorker(QString::number(i), &count);
-                              bool state = dbWorker.connect();
                               qDebug() << "connect " << i << " is " << state;
                               if (!state)
                                   return;
 
-                              for (size_t numInserts = 0; numInserts < 50000; numInserts++)
-                              {
-                                  dbWorker.send(QDateTime::currentDateTime().toSecsSinceEpoch());
-                              } });
+                                while (1)                             
+                            {
+                                  if(dbWorker.send(QDateTime::currentDateTime().toSecsSinceEpoch()))
+                                  count++;
+                            } });
     }
     return a.exec();
 }

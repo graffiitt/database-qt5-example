@@ -19,5 +19,6 @@ add_executable(database
   main.cpp
   dbWorker.cpp
   dbWorker.h
+  tsquene.h
 )
 target_link_libraries(database Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Sql Qt5::Concurrent )
